@@ -73,7 +73,7 @@ namespace SeaBattleProject
             file1.Close();
             file2.Close();
         }
-        public void ColorTheField()
+        public async void ColorTheField()
         {
             Dgv.ClearSelection();
             Dgv.Enabled = false;
@@ -126,7 +126,10 @@ namespace SeaBattleProject
 
                 }
             }
+            Dgv.Refresh();
+            await Task.Delay(1000);
         }
+
 
         public void Click(object sender, EventArgs e)
         {
@@ -139,6 +142,7 @@ namespace SeaBattleProject
 
             }
             DgvMove.CurrentCell.Selected = false;
+            //MessageBox.Show(field.Length.ToString());
         }
         public bool TryStep(int StepShip, int y, int x, int[,] tempField)
         {
@@ -168,9 +172,28 @@ namespace SeaBattleProject
             return false;
         }
 
-        public void ToRun(int stepIndex)
+        public bool IsEmptyArray(int[,] tempField)
         {
-            var tempField = new int[Height, Width];
+            double l = Math.Sqrt(tempField.Length);
+            for (int i = 0; i < l; i++)
+            {
+                for (int j = 0; j < l; j++)
+                {
+                    if (tempField[i, j] != 0) return false;
+                }
+            }
+            return true;
+        }
+        private void Button_Click_1(/*object sender, RoutedEventArgs e*/)
+        {
+            
+        }
+            public void ToRun(int stepIndex)
+            { 
+            var tempField1 = new int[Height, Width];
+            var tempField2 = new int[Height, Width];
+            var tempField3 = new int[Height, Width];
+            var tempField4 = new int[Height, Width];
             bool win = true;
             for (int i = 0; i < stepIndex; i++)
             {
@@ -179,7 +202,11 @@ namespace SeaBattleProject
                 var step2 = move[i, 1];
                 var step3 = move[i, 2];
                 var step4 = move[i, 3];
-                
+
+                tempField1 = new int[Height, Width];
+                tempField2 = new int[Height, Width];
+                tempField3 = new int[Height, Width];
+                tempField4 = new int[Height, Width];
 
                 for (int x = 0; x < Height; x++)
                 {
@@ -187,28 +214,43 @@ namespace SeaBattleProject
                     {
 
                         if (field[x, y] == 1 && step1 != 0)
-                            win = TryStep(step1, y, x, tempField);
+                            win = TryStep(step1, y, x, tempField1);
 
                         else if (field[x, y] == 2 && step2 != 0)
-                            win = TryStep(step2, y, x, tempField);
+                            win = TryStep(step2, y, x, tempField2);
 
                         else if (field[x, y] == 3 && step3 != 0)
-                            win = TryStep(step3, y, x, tempField);
+                            win = TryStep(step3, y, x, tempField3);
 
                         else if (field[x, y] == 4 && step4 != 0)
-                            win = TryStep(step4, y, x, tempField);
+                            win = TryStep(step4, y, x, tempField4);
 
-                        if (win == false && step1+step2+step3+step4>0)
+
+                        if (win == false)
                             goto finish;
-
+                        //ColorTheField();
                     }
                 }
-                field = tempField;
+                Button_Click_1();
+                if (IsEmptyArray(tempField1) == false)
+                    field = tempField1;
+                if (IsEmptyArray(tempField2) == false)
+                    field = tempField2;
+                if (Height == 5)
+                    if (IsEmptyArray(tempField3) == false)
+                        field = tempField3;
+                if (Height == 6)
+                {
+                    if (IsEmptyArray(tempField3) == false)
+                        field = tempField3;
+                    if (IsEmptyArray(tempField4) == false)
+                        field = tempField4;
+                }
                 ColorTheField();
             }
 
             finish:
-            ColorTheField();
+            //ColorTheField();
             if (win && CheckWin()) MessageBox.Show("Поздравляю, вы выиграли!");
             else MessageBox.Show("Вы проиграли");
         }
@@ -236,10 +278,12 @@ namespace SeaBattleProject
                 switch (Height)
                 {
                     case 4:
-                        for (int j = 0; j <2; j++)
+                        for (int j = 0; j < 2; j++)
                         {
                             DgvMove.Rows[i].Cells[j].Value = null;
                         }
+
+
                         break;
                     case 5:
                         for (int j = 0; j < 3; j++)
